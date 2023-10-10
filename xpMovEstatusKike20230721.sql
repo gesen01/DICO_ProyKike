@@ -72,16 +72,10 @@ AS BEGIN
 
     IF @Articulo IS NOT NULL
     BEGIN
-      SELECT @Ok = 10060, @OkRef = 'El Articulo ' + @Articulo + ' tuvo mas Abonos que Cargos' 
-
-      SELECT @Asunto = 'Error ' + @Mov + ' ' + @MovID + ' Artículo ' + @Articulo
-
-      EXECUTE msdb.dbo.sp_send_dbmail
-            @profile_name = 'Perfil',
-            @recipients   = 'etoral@intelisis.com; micorreo@gmail.com',
-            @subject      = @Asunto,
-            @body         = @Asunto
-            
+    	--10/10/2023. IGGR. Se agrega a este log los errores emitidos por los reservados en los pedidos
+      IF NOT EXISTS(SELECT 1 FROM DICOLogVentaPedido WHERE ID=@ID)
+        INSERT INTO DICOLogVentaPedido
+        	SELECT @ID,@Mov,@MovID,@Articulo,10060,'El Articulo ' + @Articulo + ' tuvo mas Abonos que Cargos',CAST(GETDATE() AS DATE)            
     END
   END
 
